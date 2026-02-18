@@ -9,6 +9,7 @@ endif()
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(octomap REQUIRED)
 
 # Ament CMake is not immediately required, but we include it at the top so that
 # if it is found we can use it in build testing before requiring a

@@ -409,6 +409,24 @@ tl::expected<void, std::string> Scene::addSphereGeometry(const std::string& name
   return addGeometry(geom_obj);
 }
 
+tl::expected<void, std::string> Scene::addOcTreeGeometry(const std::string& name,
+                                                         const std::string& parent_frame,
+                                                         const OcTree& octree,
+                                                         const Eigen::Matrix4d& tform,
+                                                         const Eigen::Vector4d& color) {
+  const auto maybe_parent_frame_id = getFrameId(parent_frame);
+  if (!maybe_parent_frame_id) {
+    return tl::make_unexpected("Failed to add octree: " + maybe_parent_frame_id.error());
+  }
+  const auto& parent_frame_id = maybe_parent_frame_id.value();
+  const auto parent_joint_id = model_.frames.at(parent_frame_id).parentJoint;
+
+  pinocchio::GeometryObject geom_obj{name, parent_frame_id, parent_joint_id, pinocchio::SE3(tform),
+                                     octree.geom_ptr};
+  geom_obj.meshColor = color;
+  return addGeometry(geom_obj);
+}
+
 tl::expected<void, std::string> Scene::addGeometry(const pinocchio::GeometryObject& geom_obj) {
   auto it = collision_geometry_map_.find(geom_obj.name);
   if (it != collision_geometry_map_.end()) {
@@ -466,11 +484,22 @@ tl::expected<void, std::string> Scene::removeGeometry(const std::string& name) {
 tl::expected<std::vector<pinocchio::GeomIndex>, std::string>
 Scene::getCollisionGeometryIds(const std::string& body) {
   // First look for the body in the list of external collision geometries.
+  std::cout << "----------" << std::endl;
+  std::cout << "PRINT FOR COLLISION_GEOMETRY_MAP " << body << std::endl;
+  for (const auto & [k, v] : collision_geometry_map_) {
+    std::cout << "JARBAY DBG: " << k << std::endl;
+  }
+  std::cout << "**********" << std::endl;
+
   auto it = collision_geometry_map_.find(body);
   if (it != collision_geometry_map_.end()) {
     return std::vector<pinocchio::GeomIndex>{it->second};
   }
 
+  std::cout << "PRINT FOR FRAMEMAP " << body << std::endl;
+  for (const auto & [k, v] : frame_map_) {
+    std::cout << "JARBAY DBG: " << k << std::endl;
+  }
   // Otherwise, look through the Pinocchio model itself.
   const auto maybe_body_frame_id = getFrameId(body);
   if (!maybe_body_frame_id) {

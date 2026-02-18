@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hpp/fcl/shape/geometric_shapes.h>
+#include <hpp/fcl/octree.h>
 
 namespace roboplan {
 
@@ -27,6 +28,14 @@ struct Sphere {
 
   /// @brief The underlying Coal sphere geometry.
   std::shared_ptr<hpp::fcl::Sphere> geom_ptr;
+};
+
+struct OcTree {
+  OcTree(const double resolution) {
+    geom_ptr = std::make_shared<hpp::fcl::OcTree>(resolution);
+  };
+  
+  std::shared_ptr<hpp::fcl::OcTree> geom_ptr;
 };
 
 }  // namespace roboplan

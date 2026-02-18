@@ -7,7 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pinocchio as pin
 
-from roboplan.core import Box, Scene, Sphere
+from roboplan.core import Box, Scene, Sphere, OcTree
 from roboplan.example_models import get_package_models_dir
 
 
@@ -40,6 +40,14 @@ class ObstacleConfig:
                 self.name,
                 self.parent_frame,
                 Sphere(self.geom.radius),
+                self.tform,
+                self.color,
+            )
+        elif isinstance(self.geom, hppfcl.OcTree):
+            scene.addOcTreeGeometry(
+                self.name,
+                self.parent_frame,
+                OcTree(0.2),
                 self.tform,
                 self.color,
             )
@@ -128,6 +136,14 @@ MODELS = {
                 tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, -0.1])).homogeneous,
                 color=np.array([0.5, 0.5, 0.5, 0.5]),
                 disabled_collisions=["base_link", "test_box", "test_sphere"],
+            ),
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=hppfcl.makeOctree(np.random.rand(1000, 3), 0.01),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.4, -0.1])).homogeneous,
+                color=np.array([0.3, 1.0, 0.3, 0.5]),
+                disabled_collisions=["base_link", "test_sphere"],
             ),
         ],
     ),

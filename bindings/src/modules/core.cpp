@@ -131,6 +131,8 @@ void init_core_geometry_wrappers(nanobind::module_& m) {
       .def(nanobind::init<const double, const double, const double>(), "x"_a, "y"_a, "z"_a);
   nanobind::class_<Sphere>(m, "Sphere", "Temporary wrapper struct to represent a sphere geometry.")
       .def(nanobind::init<const double>(), "radius"_a);
+  nanobind::class_<OcTree>(m, "OcTree", "Temporary wrapper struct to represent a octree geometry.")
+      .def(nanobind::init<const double>(), "radius"_a);
 }
 
 void init_core_scene(nanobind::module_& m) {
@@ -222,6 +224,9 @@ void init_core_scene(nanobind::module_& m) {
            "color"_a)
       .def("addSphereGeometry", unwrap_expected(&Scene::addSphereGeometry),
            "Adds a sphere geometry to the scene.", "name"_a, "parent_frame"_a, "sphere"_a,
+           "tform"_a, "color"_a)
+      .def("addOcTreeGeometry", unwrap_expected(&Scene::addOcTreeGeometry),
+           "Adds a octree geometry to the scene.", "name"_a, "parent_frame"_a, "octree"_a,
            "tform"_a, "color"_a)
       .def("updateGeometryPlacement", unwrap_expected(&Scene::updateGeometryPlacement),
            "Updates the placement of an object geometry in the scene.", "name"_a, "parent_frame"_a,
