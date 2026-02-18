@@ -83,13 +83,20 @@ bool SimpleIk::solveIk(const std::vector<CartesianConfiguration>& goals,
             full_jacobian_(Eigen::placeholders::all, v_indices);
       }
 
-      // Finalize solution if the error is below threshold.
-      // Note the error norm is accumulated per target frame (batch of 6).
-      double error_norm = 0.0;
+      // Ensure every target frame meets both linear and angular error tolerances.
+      bool converged = true;
       for (size_t idx = 0; idx < n_frames; ++idx) {
-        error_norm += error_.segment(idx * 6, 6).norm();
+        const auto target_frame_error = error_.segment(idx * 6, 6);
+        const auto linear_error = target_frame_error.head<3>().norm();
+        const auto angular_error = target_frame_error.tail<3>().norm();
+        if (linear_error > options_.max_linear_error_norm ||
+            angular_error > options_.max_angular_error_norm) {
+          converged = false;
+          break;
+        }
       }
-      if (error_norm <= options_.max_error_norm) {
+
+      if (converged) {
         if (!options_.check_collisions || !scene_->hasCollisions(q)) {
           solution.positions = q(q_indices);
         }

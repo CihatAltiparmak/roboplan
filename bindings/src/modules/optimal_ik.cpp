@@ -37,11 +37,14 @@ void init_optimal_ik(nanobind::module_& m) {
   // Bind FrameTask inheriting from Task
   nanobind::class_<FrameTask, Task>(m, "FrameTask",
                                     "Task to reach a target pose for a specified frame.")
-      .def(nanobind::init<const std::string&, const CartesianConfiguration&, int,
-                          const FrameTaskOptions&>(),
-           "frame_name"_a, "target_pose"_a, "num_variables"_a, "options"_a = FrameTaskOptions{})
-      .def_rw("frame_name", &FrameTask::frame_name, "Name of the frame to control.")
-      .def_rw("target_pose", &FrameTask::target_pose, "Target pose for the frame.");
+      .def(nanobind::init<const CartesianConfiguration&, int, const FrameTaskOptions&>(),
+           "target_pose"_a, "num_variables"_a, "options"_a = FrameTaskOptions{})
+      .def_ro("frame_name", &FrameTask::frame_name, "Name of the frame to control.")
+      .def_ro("frame_id", &FrameTask::frame_id,
+              "Index of the frame in the scene's Pinocchio model.")
+      .def_ro("target_pose", &FrameTask::target_pose, "Target pose for the frame.")
+      .def("setTargetFrameTransform", &FrameTask::setTargetFrameTransform,
+           "Sets the target transform for this frame task.");
 
   // Bind ConfigurationTaskOptions configuration struct
   nanobind::class_<ConfigurationTaskOptions>(m, "ConfigurationTaskOptions",
@@ -86,13 +89,14 @@ void init_optimal_ik(nanobind::module_& m) {
           "solveIk",
           [](Oink& self, const std::vector<std::shared_ptr<Task>>& tasks,
              const std::vector<std::shared_ptr<Constraints>>& constraints,
-             const std::shared_ptr<Scene>& scene, nanobind::DRef<Eigen::VectorXd> delta_q) {
-            auto result = self.solveIk(tasks, constraints, *scene, delta_q);
+             const std::shared_ptr<Scene>& scene, nanobind::DRef<Eigen::VectorXd> delta_q,
+             double regularization) {
+            auto result = self.solveIk(tasks, constraints, *scene, delta_q, regularization);
             if (!result.has_value()) {
               throw std::runtime_error("IK solve failed: " + result.error());
             }
           },
-          "tasks"_a, "constraints"_a, "scene"_a, "delta_q"_a,
+          "tasks"_a, "constraints"_a, "scene"_a, "delta_q"_a, "regularization"_a = 1e-12,
           "Solve inverse kinematics for given tasks and constraints.\n\n"
           "Solves a QP optimization problem to compute the joint velocity that minimizes\n"
           "weighted task errors while satisfying all constraints. The result is written\n"
@@ -102,7 +106,10 @@ void init_optimal_ik(nanobind::module_& m) {
           "    constraints: List of constraints to satisfy.\n"
           "    scene: Scene containing robot model and state.\n"
           "    delta_q: Pre-allocated numpy array for output (size = num_variables).\n"
-          "             Must be a contiguous float64 array. Modified in-place.\n\n"
+          "             Must be a contiguous float64 array. Modified in-place.\n"
+          "    regularization: Tikhonov regularization weight for the QP Hessian.\n"
+          "                    Higher values improve numerical stability but may reduce\n"
+          "                    task tracking accuracy. Default: 1e-12.\n\n"
           "Raises:\n"
           "    RuntimeError: If the QP solver fails to find a solution.\n\n"
           "Example:\n"

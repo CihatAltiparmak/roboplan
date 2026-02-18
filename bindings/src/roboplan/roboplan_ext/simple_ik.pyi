@@ -7,7 +7,7 @@ import roboplan_ext.core
 class SimpleIkOptions:
     """Options struct for simple IK solver."""
 
-    def __init__(self, group_name: str = '', max_iters: int = 100, max_time: float = 0.01, max_restarts: int = 2, step_size: float = 0.01, damping: float = 0.001, max_error_norm: float = 0.001, check_collisions: bool = True) -> None: ...
+    def __init__(self, group_name: str = '', max_iters: int = 100, max_time: float = 0.01, max_restarts: int = 2, step_size: float = 0.01, damping: float = 0.001, max_linear_error_norm: float = 0.001, max_angular_error_norm: float = 0.001, check_collisions: bool = True) -> None: ...
 
     @property
     def group_name(self) -> str:
@@ -52,11 +52,18 @@ class SimpleIkOptions:
     def damping(self, arg: float, /) -> None: ...
 
     @property
-    def max_error_norm(self) -> float:
-        """The maximum error norm."""
+    def max_linear_error_norm(self) -> float:
+        """The maximum linear error norm, in meters."""
 
-    @max_error_norm.setter
-    def max_error_norm(self, arg: float, /) -> None: ...
+    @max_linear_error_norm.setter
+    def max_linear_error_norm(self, arg: float, /) -> None: ...
+
+    @property
+    def max_angular_error_norm(self) -> float:
+        """The maximum angular error norm, in radians."""
+
+    @max_angular_error_norm.setter
+    def max_angular_error_norm(self, arg: float, /) -> None: ...
 
     @property
     def check_collisions(self) -> bool:

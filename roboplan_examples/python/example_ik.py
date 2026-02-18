@@ -19,7 +19,8 @@ def main(
     model: str = "ur5",
     max_iters: int = 100,
     step_size: float = 0.25,
-    max_error_norm: float = 0.001,
+    max_linear_error_norm: float = 0.001,
+    max_angular_error_norm: float = 0.001,
     check_collisions: bool = True,
     host: str = "localhost",
     port: str = "8000",
@@ -32,7 +33,8 @@ def main(
         model: The name of the model to use.
         max_iters: Maximum number of iterations for the IK solver.
         step_size: Integration step size for the IK solver.
-        max_error_norm: The maximum error norm for the IK solver.
+        max_linear_error_norm: The maximum linear error norm for the IK solver.
+        max_angular_error_norm: The maximum angular error norm for the IK solver.
         check_collisions: Whether to check for collisions when solving IK.
         host: The host for the ViserVisualizer.
         port: The port for the ViserVisualizer.
@@ -78,7 +80,8 @@ def main(
         group_name=model_data.default_joint_group,
         max_iters=max_iters,
         step_size=step_size,
-        max_error_norm=max_error_norm,
+        max_linear_error_norm=max_linear_error_norm,
+        max_angular_error_norm=max_angular_error_norm,
         check_collisions=check_collisions,
     )
     ik_solver = SimpleIk(scene, options)
