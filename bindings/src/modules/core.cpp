@@ -11,8 +11,6 @@
 #include <roboplan/core/scene_utils.hpp>
 #include <roboplan/core/types.hpp>
 
-#include <hpp/fcl/octree.h>
-
 #include <modules/core.hpp>
 #include <utils/expected.hpp>
 

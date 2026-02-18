@@ -306,7 +306,6 @@ class OcTree:
     """Temporary wrapper struct to represent a octree geometry."""
 
     def __init__(self, resolution: float) -> None: ...
-    def __init__(self, geom: hppfcl.OcTree) -> None: ...
 
 class Scene:
     """Primary scene representation for planning and control."""
