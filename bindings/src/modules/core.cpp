@@ -11,6 +11,8 @@
 #include <roboplan/core/scene_utils.hpp>
 #include <roboplan/core/types.hpp>
 
+#include <hpp/fcl/octree.h>
+
 #include <modules/core.hpp>
 #include <utils/expected.hpp>
 
@@ -132,7 +134,7 @@ void init_core_geometry_wrappers(nanobind::module_& m) {
   nanobind::class_<Sphere>(m, "Sphere", "Temporary wrapper struct to represent a sphere geometry.")
       .def(nanobind::init<const double>(), "radius"_a);
   nanobind::class_<OcTree>(m, "OcTree", "Temporary wrapper struct to represent a octree geometry.")
-      .def(nanobind::init<const double>(), "radius"_a);
+      .def(nanobind::init<const double>(), "resolution"_a);
 }
 
 void init_core_scene(nanobind::module_& m) {

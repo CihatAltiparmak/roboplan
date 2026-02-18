@@ -484,22 +484,11 @@ tl::expected<void, std::string> Scene::removeGeometry(const std::string& name) {
 tl::expected<std::vector<pinocchio::GeomIndex>, std::string>
 Scene::getCollisionGeometryIds(const std::string& body) {
   // First look for the body in the list of external collision geometries.
-  std::cout << "----------" << std::endl;
-  std::cout << "PRINT FOR COLLISION_GEOMETRY_MAP " << body << std::endl;
-  for (const auto & [k, v] : collision_geometry_map_) {
-    std::cout << "JARBAY DBG: " << k << std::endl;
-  }
-  std::cout << "**********" << std::endl;
-
   auto it = collision_geometry_map_.find(body);
   if (it != collision_geometry_map_.end()) {
     return std::vector<pinocchio::GeomIndex>{it->second};
   }
 
-  std::cout << "PRINT FOR FRAMEMAP " << body << std::endl;
-  for (const auto & [k, v] : frame_map_) {
-    std::cout << "JARBAY DBG: " << k << std::endl;
-  }
   // Otherwise, look through the Pinocchio model itself.
   const auto maybe_body_frame_id = getFrameId(body);
   if (!maybe_body_frame_id) {

@@ -44,10 +44,11 @@ class ObstacleConfig:
                 self.color,
             )
         elif isinstance(self.geom, hppfcl.OcTree):
+            resolution = self.geom.getResolution()
             scene.addOcTreeGeometry(
                 self.name,
                 self.parent_frame,
-                OcTree(0.2),
+                OcTree(resolution),
                 self.tform,
                 self.color,
             )

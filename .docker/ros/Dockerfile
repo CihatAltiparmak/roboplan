@@ -8,8 +8,7 @@ SHELL ["/bin/bash", "-c"]
 # Install core dependencies.
 RUN apt update -y \
     && apt upgrade -y \
-    && apt install -y libgmock-dev python3-pip && \
-    apt install ros-${ROS_DISTRO}-octomap
+    && apt install -y libgmock-dev python3-pip
 
 # Install Python dependencies needed for bindings.
 # Note that since Pinocchio in ROS is built with Numpy 1.x, we must preserve this by
