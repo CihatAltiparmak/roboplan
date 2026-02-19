@@ -186,7 +186,7 @@ public:
   tl::expected<void, std::string>
   addSphereGeometry(const std::string& name, const std::string& parent_frame, const Sphere& sphere,
                     const Eigen::Matrix4d& tform, const Eigen::Vector4d& color);
-  
+
   tl::expected<void, std::string>
   addOcTreeGeometry(const std::string& name, const std::string& parent_frame, const OcTree& octree,
                     const Eigen::Matrix4d& tform, const Eigen::Vector4d& color);

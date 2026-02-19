@@ -6,7 +6,6 @@ from common import MODELS
 from roboplan.core import Scene
 from roboplan.example_models import get_package_share_dir
 
-
 if __name__ == "__main__":
 
     model = "dual"

@@ -230,7 +230,7 @@ class ViserVisualizer(BaseVisualizer):
             raise RuntimeError(f"Unsupported geometry type for {name}: {type(geom)}")
 
         self.frames[name] = frame
-    
+
     def createMeshFromOcTree(self, name, geom, color_override):
         # Inspired from https://github.com/stack-of-tasks/pinocchio/blob/655877b314baed68c7e2d4dd56b0a0200bb9f98e/bindings/python/pinocchio/visualize/meshcat_visualizer.py#L235-L295
         boxes = geom.toBoxes()
@@ -294,12 +294,12 @@ class ViserVisualizer(BaseVisualizer):
 
             face_id += 12
         return self.viewer.scene.add_mesh_simple(
-                name,
-                all_points,
-                all_faces,
-                color=color_override[:3],
-                opacity=color_override[3],
-            )
+            name,
+            all_points,
+            all_faces,
+            color=color_override[:3],
+            opacity=color_override[3],
+        )
 
     def display(self, q=None):
         """

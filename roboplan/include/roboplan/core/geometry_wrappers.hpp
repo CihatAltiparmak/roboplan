@@ -1,7 +1,7 @@
 #pragma once
 
-#include <hpp/fcl/shape/geometric_shapes.h>
 #include <hpp/fcl/octree.h>
+#include <hpp/fcl/shape/geometric_shapes.h>
 
 namespace roboplan {
 
@@ -31,10 +31,8 @@ struct Sphere {
 };
 
 struct OcTree {
-  OcTree(const double resolution) {
-    geom_ptr = std::make_shared<hpp::fcl::OcTree>(resolution);
-  };
-  
+  OcTree(const double resolution) { geom_ptr = std::make_shared<hpp::fcl::OcTree>(resolution); };
+
   std::shared_ptr<hpp::fcl::OcTree> geom_ptr;
 };
 
