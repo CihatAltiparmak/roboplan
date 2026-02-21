@@ -182,6 +182,46 @@ TEST_F(RoboPlanSceneTest, TestCollisionGeometry) {
   ASSERT_FALSE(scene_->hasCollisions(q));
 }
 
+TEST_F(RoboPlanSceneTest, TestCollisionForOcTreeGeometry) {
+  // Nominally, this configuration is collision free.
+  Eigen::VectorXd q(6);
+  q << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+  ASSERT_FALSE(scene_->hasCollisions(q));
+
+  const auto color = Eigen::Vector4d(0.5, 0.5, 0.5, 0.5);
+  // Create octree with resolution 0.1 which generates Box(1.0, 1.0, 0.5)
+  const double resolution = 0.1;
+  Eigen::Matrix<double, 500, 3> point_cloud;
+  for (size_t x = 0; x < 10; ++x) {
+    for (size_t y = 0; y < 10; ++y) {
+      for (size_t z = 0; z < 5; ++z) {
+        point_cloud(50 * x + 5 * y + z, 0) = x;
+        point_cloud(50 * x + 5 * y + z, 1) = y;
+        point_cloud(50 * x + 5 * y + z, 2) = z;
+      }
+    }
+  }
+  auto octree_geometry = OcTree(resolution);
+  octree_geometry.geom_ptr = hpp::fcl::makeOctree(point_cloud, resolution);
+
+  Eigen::Matrix4d octree_tform = Eigen::Matrix4d::Identity();
+  octree_tform(0, 3) = 1.0;  // z position
+
+  const auto add_octree_result =
+      scene_->addOcTreeGeometry("test_octree", "universe", octree_geometry, octree_tform, color);
+  ASSERT_TRUE(add_octree_result.has_value()) << add_octree_result.error();
+
+  ASSERT_FALSE(scene_->hasCollisions(q));  // should still be collision free
+
+  // Now move one of the collision objects to be in collision.
+  octree_tform(0, 3) = 0.0;
+  const auto move_octree_result =
+      scene_->updateGeometryPlacement("test_octree", "universe", octree_tform);
+
+  ASSERT_TRUE(move_octree_result.has_value()) << move_octree_result.error();
+  ASSERT_TRUE(scene_->hasCollisions(q));
+}
+
 TEST_F(RoboPlanSceneTest, TestSetCollisions) {
   // Nominally, this configuration is collision free.
   Eigen::VectorXd q(6);
