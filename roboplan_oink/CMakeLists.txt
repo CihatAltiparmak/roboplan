@@ -5,18 +5,41 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+# Set a new oink specific build testing option since osqp can mess with the original.
+option(BUILD_TESTING "" ON)
+option(BUILD_TESTING_OINK "" ${BUILD_TESTING})
+
 # Include FetchContent for downloading dependencies
 include(FetchContent)
 
 # Find dependencies.
 find_package(roboplan REQUIRED)
 
+# Ament CMake is not immediately required, but we include it at the top so that
+# if it is found we can use it in build testing before requiring a
+# find_package(ament_cmake_test REQUIRED). Otherwise this can cause infinite recursion
+# issues with symlink installs.
+find_package(ament_cmake QUIET)
+
 # Try to find OsqpEigen
 find_package(OsqpEigen QUIET)
 
 if(NOT OsqpEigen_FOUND)
-  # When building OsqpEigen from source, we need OSQP >= 1.0.0
+  # When building OsqpEigen from source, we need OSQP >= 1.0.0.
   find_package(osqp QUIET)
+
+  # ROS osqp vendor package can set osqp_FOUND without osqp_VERSION.
+  # Disable follow-up osqp package lookup so OsqpEigen uses the vendored OSQP.
+  if(ament_cmake_FOUND AND osqp_FOUND AND NOT DEFINED osqp_VERSION)
+    set(
+      CMAKE_DISABLE_FIND_PACKAGE_osqp
+      ON
+      CACHE BOOL "Disable find_package(osqp) to avoid mixed OSQP/OsqpEigen APIs."
+      FORCE
+    )
+    set(osqp_FOUND FALSE)
+    message(STATUS "Detected osqp package without osqp_VERSION; forcing vendored OSQP + OsqpEigen.")
+  endif()
 
   if(NOT osqp_FOUND OR osqp_VERSION VERSION_LESS "1.0.0")
     message(STATUS "OSQP not found or version < 1.0.0. Fetching from GitHub...")
@@ -62,12 +85,6 @@ if(NOT OsqpEigen_FOUND)
   )
   FetchContent_MakeAvailable(osqp-eigen)
 endif()
-
-# Ament CMake is not immediately required, but we include it at the top so that
-# if it is found we can use it in build testing before requiring a
-# find_package(ament_cmake_test REQUIRED). Otherwise this can cause infinite recursion
-# issues with symlink installs.
-find_package(ament_cmake QUIET)
 
 # Add libraries
 add_library(roboplan_oink SHARED
@@ -136,8 +153,7 @@ install(EXPORT roboplan_oink-targets
         DESTINATION lib/cmake/roboplan_oink)
 
 # Add the unit tests, if enabled.
-option(BUILD_TESTING "" ON)
-if (BUILD_TESTING)
+if (BUILD_TESTING_OINK)
     enable_testing()
     add_subdirectory(test)
 endif()
