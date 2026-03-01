@@ -132,7 +132,8 @@ void init_core_geometry_wrappers(nanobind::module_& m) {
   nanobind::class_<Sphere>(m, "Sphere", "Temporary wrapper struct to represent a sphere geometry.")
       .def(nanobind::init<const double>(), "radius"_a);
   nanobind::class_<OcTree>(m, "OcTree", "Temporary wrapper struct to represent a octree geometry.")
-      .def(nanobind::init<const double>(), "resolution"_a);
+      .def(nanobind::init<const std::vector<Eigen::Matrix<double, 6, 1>>&, const double>(),
+           "boxes"_a, "resolution"_a);
 }
 
 void init_core_scene(nanobind::module_& m) {

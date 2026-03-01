@@ -31,7 +31,19 @@ struct Sphere {
 };
 
 struct OcTree {
-  OcTree(const double resolution) { geom_ptr = std::make_shared<hpp::fcl::OcTree>(resolution); };
+  OcTree(const std::vector<Eigen::Matrix<double, 6, 1>>& boxes, const double resolution) {
+    auto octree = std::make_shared<octomap::OcTree>(resolution);
+
+    for (const auto& box : boxes) {
+      octree->updateNode(box[0], box[1], box[2], true, true);
+    }
+
+    octree->updateInnerOccupancy();
+
+    geom_ptr = std::make_shared<hpp::fcl::OcTree>(octree);
+  }
+
+  OcTree(const std::shared_ptr<hpp::fcl::OcTree>& octree_geom) { geom_ptr = octree_geom; }
 
   std::shared_ptr<hpp::fcl::OcTree> geom_ptr;
 };

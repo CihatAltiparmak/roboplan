@@ -1,3 +1,5 @@
+"""Core roboplan module"""
+
 from collections.abc import Sequence
 import enum
 import os
@@ -305,7 +307,7 @@ class Sphere:
 class OcTree:
     """Temporary wrapper struct to represent a octree geometry."""
 
-    def __init__(self, resolution: float) -> None: ...
+    def __init__(self, boxes: Sequence[Annotated[NDArray[numpy.float64], dict(shape=(6), order='C')]], resolution: float) -> None: ...
 
 class Scene:
     """Primary scene representation for planning and control."""

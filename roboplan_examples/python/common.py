@@ -44,11 +44,12 @@ class ObstacleConfig:
                 self.color,
             )
         elif isinstance(self.geom, hppfcl.OcTree):
+            boxes = self.geom.toBoxes()
             resolution = self.geom.getResolution()
             scene.addOcTreeGeometry(
                 self.name,
                 self.parent_frame,
-                OcTree(resolution),
+                OcTree(boxes, resolution),
                 self.tform,
                 self.color,
             )
@@ -142,7 +143,7 @@ MODELS = {
                 name="octree_cloud",
                 geom=hppfcl.makeOctree(np.random.rand(1000, 3), 0.01),
                 parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.4, -0.1])).homogeneous,
+                tform=pin.SE3(np.eye(3), np.array([-1.5, -0.5, 0.3])).homogeneous,
                 color=np.array([0.3, 1.0, 0.3, 0.5]),
                 disabled_collisions=["base_link", "test_sphere"],
             ),
