@@ -34,8 +34,13 @@ struct OcTree {
   OcTree(const std::vector<Eigen::Matrix<double, 6, 1>>& boxes, const double resolution) {
     auto octree = std::make_shared<octomap::OcTree>(resolution);
 
+    if (!boxes.empty()) {
+      const double thresh = boxes[0][5];
+      octree->setOccupancyThres(thresh);
+    }
+
     for (const auto& box : boxes) {
-      octree->updateNode(box[0], box[1], box[2], true, true);
+      octree->updateNode(box[0], box[1], box[2], octomap::logodds(box[4]), true);
     }
 
     octree->updateInnerOccupancy();
