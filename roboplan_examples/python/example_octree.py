@@ -17,6 +17,7 @@ import hppfcl
 import numpy as np
 from roboplan.core import Box, Scene, Sphere, OcTree
 
+
 def create_table():
     x = np.linspace(0, 1, 10, endpoint=False)
     y = np.linspace(0, 1, 10, endpoint=False)
@@ -47,11 +48,12 @@ def create_table():
 
     return p3d
 
+
 def setupScene(model: str = "ur5"):
     if model not in MODELS:
         print(f"Invalid model requested: {model}")
         sys.exit(1)
-    
+
     model_data = MODELS[model]
     package_paths = [get_package_share_dir()]
 
@@ -78,22 +80,20 @@ def setupScene(model: str = "ur5"):
     tform = pin.SE3(np.eye(3), np.array([0.2, -0.5, 0.0])).homogeneous
     color = np.array([0.3, 1.0, 0.3, 1.0])
     scene.addOcTreeGeometry(
-        name, # name
-        parent_frame, # parent frame
+        name,  # name
+        parent_frame,  # parent frame
         OcTree(boxes, resolution),
-        tform, #tform
-        color, # color
+        tform,  # tform
+        color,  # color
     )
 
-def main(
-    model: str = "ur5",
-    host: str = "localhost",
-    port: str = "8000"):
+
+def main(model: str = "ur5", host: str = "localhost", port: str = "8000"):
 
     if model not in MODELS:
         print(f"Invalid model requested: {model}")
         sys.exit(1)
-    
+
     model_data = MODELS[model]
     package_paths = [get_package_share_dir()]
 
@@ -130,11 +130,11 @@ def main(
     tform = pin.SE3(np.eye(3), np.array([0.2, -0.5, 0.0])).homogeneous
     color = np.array([0.3, 1.0, 0.3, 1.0])
     scene.addOcTreeGeometry(
-        name, # name
-        parent_frame, # parent frame
+        name,  # name
+        parent_frame,  # parent frame
         OcTree(boxes, resolution),
-        tform, #tform
-        color, # color
+        tform,  # tform
+        color,  # color
     )
 
     geom_obj = pin.GeometryObject(
@@ -155,6 +155,7 @@ def main(
             time.sleep(10.0)
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == "__main__":
     tyro.cli(main)
