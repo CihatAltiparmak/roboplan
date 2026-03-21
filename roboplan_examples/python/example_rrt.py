@@ -16,8 +16,9 @@ from roboplan.rrt import RRTOptions, RRT
 from roboplan.toppra import PathParameterizerTOPPRA
 from roboplan.viser_visualizer import ViserVisualizer
 from roboplan.visualization import (
-    visualizePath,
     visualizeJointTrajectory,
+    visualizePath,
+    plotJointTrajectory,
     visualizeTree,
 )
 
@@ -26,6 +27,7 @@ def main(
     model: str = "ur5",
     max_connection_distance: float = 3.0,
     collision_check_step_size: float = 0.05,
+    collision_check_use_bisection: bool = False,
     goal_biasing_probability: float = 0.15,
     max_nodes: int = 1000,
     max_planning_time: float = 5.0,
@@ -44,6 +46,8 @@ def main(
         model: The name of the model to use.
         max_connection_distance: Maximum connection distance between two search nodes.
         collision_check_step_size: Configuration-space step size for collision checking along edges.
+        collision_check_use_bisection: If true, uses bisection instead of linear search for collision checking along edges.
+            This can be helpful in collision-dense environments, but has a lower worst-case performance.
         goal_biasing_probability: Weighting of the goal node during random sampling.
         max_nodes: The maximum number of nodes to add to the search tree.
         max_planning_time: The maximum time (in seconds) to search for a path.
@@ -105,6 +109,7 @@ def main(
         max_nodes=max_nodes,
         max_connection_distance=max_connection_distance,
         collision_check_step_size=collision_check_step_size,
+        collision_check_use_bisection=collision_check_use_bisection,
         goal_biasing_probability=goal_biasing_probability,
         max_planning_time=max_planning_time,
         rrt_connect=rrt_connect,
@@ -122,7 +127,6 @@ def main(
     animate = False
 
     if rng_seed:
-        scene.setRngSeed(rng_seed)
         rrt.setRngSeed(rng_seed)
 
     q_full = scene.randomCollisionFreePositions()
@@ -180,18 +184,21 @@ def main(
         viz.display(q_full)
         visualizeTree(viz, scene, rrt, model_data.ee_names, 0.05)
         if include_shortcutting:
-            visualizePath(viz, scene, path, model_data.ee_names, 0.05)
             visualizePath(
+                viz, scene, path, model_data.ee_names, 0.05, (100, 0, 0), "/rrt/path"
+            )
+            visualizeJointTrajectory(
                 viz,
                 scene,
                 traj,
                 model_data.ee_names,
-                0.05,
                 (0, 100, 0),
                 "/rrt/shortcut_path",
             )
         else:
-            visualizePath(viz, scene, traj, model_data.ee_names, 0.05)
+            visualizeJointTrajectory(
+                viz, scene, traj, model_data.ee_names, (100, 0, 0), "/rrt/path"
+            )
 
         traj_queue.put(traj)
         plan_button.disabled = False
@@ -215,7 +222,7 @@ def main(
         if not traj_queue.empty():
             plt.clf()
             cur_traj = traj_queue.get()
-            fig = visualizeJointTrajectory(cur_traj, scene)
+            fig = plotJointTrajectory(cur_traj, scene)
             plt.draw()
             fig.canvas.draw()
             fig.canvas.flush_events()
