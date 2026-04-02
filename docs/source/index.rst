@@ -32,6 +32,8 @@ Quick Links:
 
    design
    getting_started
+   trajectory_generation
+   inverse_kinematics
    project_ideas
    api_cpp
    api_py
