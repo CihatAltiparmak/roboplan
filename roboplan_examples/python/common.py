@@ -8,7 +8,31 @@ from numpy.typing import NDArray
 import pinocchio as pin
 
 from roboplan.core import Box, Scene, Sphere, OcTree
-from roboplan.example_models import get_package_models_dir
+from roboplan.example_models import get_package_models_dir, get_package_share_dir
+from plyfile import PlyData
+import os
+
+
+def load_point_cloud(pointcloud_path=None, voxel_resolution=0.04):
+    """
+    Loads a point cloud from a PLY file and converts it into an octree structure.
+
+    Returns
+    -------
+    octree : hppfcl.Octree
+        An octree data structure representing the hierarchical spatial partitioning
+        of the point cloud. The voxel resolution default value is set to 0.04 units.
+    """
+
+    # Read the PLY file
+    ply_data = PlyData.read(pointcloud_path)
+
+    # Access vertex data
+    vertices = ply_data["vertex"]
+    vertex_array = np.array([vertices["x"], vertices["y"], vertices["z"]]).T
+    octree = hppfcl.makeOctree(vertex_array, voxel_resolution)
+
+    return octree
 
 
 @dataclass
@@ -101,10 +125,14 @@ class RobotModelConfig:
     base_link: str
     starting_joint_config: List[float]
     obstacles: List[ObstacleConfig]
+    octrees: List[ObstacleConfig]
 
 
 # Base directory for all robot models
 ROBOPLAN_MODELS_DIR = get_package_models_dir()
+ROBOPLAN_POINCLOUDS_DIR = os.path.join(
+    get_package_share_dir(), "roboplan_example_models", "pointclouds"
+)
 
 MODELS = {
     "ur5": RobotModelConfig(
@@ -115,6 +143,18 @@ MODELS = {
         ee_names=["tool0"],
         base_link="base",
         starting_joint_config=[0.0, -np.pi / 2, np.pi / 2, -np.pi / 2, -np.pi / 2, 0.0],
+        octrees=[
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=load_point_cloud(
+                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
+                    0.04,
+                ),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+                color=np.array([0.251, 0.878, 0.816, 1.0]),
+            ),
+        ],
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -139,14 +179,6 @@ MODELS = {
                 color=np.array([0.5, 0.5, 0.5, 0.5]),
                 disabled_collisions=["base_link", "test_box", "test_sphere"],
             ),
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=hppfcl.makeOctree(np.random.rand(1000, 3), 0.01),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([-1.5, -0.5, 0.3])).homogeneous,
-                color=np.array([0.3, 1.0, 0.3, 0.5]),
-                disabled_collisions=["base_link", "test_sphere"],
-            ),
         ],
     ),
     "franka": RobotModelConfig(
@@ -166,6 +198,18 @@ MODELS = {
             np.pi / 4,
             0.04,
             0.04,
+        ],
+        octrees=[
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=load_point_cloud(
+                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
+                    0.4,
+                ),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+                color=np.array([0.251, 0.878, 0.816, 1.0]),
+            ),
         ],
         obstacles=[
             ObstacleConfig(
@@ -224,6 +268,18 @@ MODELS = {
             0.04,
             0.04,
         ],
+        octrees=[
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=load_point_cloud(
+                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
+                    0.4,
+                ),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+                color=np.array([0.251, 0.878, 0.816, 1.0]),
+            ),
+        ],
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -271,6 +327,18 @@ MODELS = {
             0.0,
             0.0,
         ],
+        octrees=[
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=load_point_cloud(
+                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
+                    0.4,
+                ),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+                color=np.array([0.251, 0.878, 0.816, 1.0]),
+            ),
+        ],
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -307,6 +375,18 @@ MODELS = {
         ee_names=["gripper_link"],
         base_link="base_link",
         starting_joint_config=[0.0, -np.pi / 4, 0.0, -np.pi / 2, 0.0, np.pi / 4],
+        octrees=[
+            ObstacleConfig(
+                name="octree_cloud",
+                geom=load_point_cloud(
+                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
+                    0.4,
+                ),
+                parent_frame="universe",
+                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+                color=np.array([0.251, 0.878, 0.816, 1.0]),
+            ),
+        ],
         obstacles=[
             ObstacleConfig(
                 name="test_box",

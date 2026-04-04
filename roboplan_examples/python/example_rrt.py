@@ -39,6 +39,7 @@ def main(
     port: str = "8000",
     rng_seed: int | None = None,
     include_obstacles: bool = False,
+    include_octrees: bool = False,
 ):
     """
     Run the RRT example with the provided parameters.
@@ -97,7 +98,11 @@ def main(
     # Optionally add obstacles.
     # Again, until Pinocchio 4.x releases nanobind bindings, we need to add the obstacles separately
     # to the scene and to the Pinocchio models used for visualization.
-    if include_obstacles:
+    if include_octrees:
+        for obstacle in model_data.octrees:
+            obstacle.addToScene(scene)
+            obstacle.addToPinocchioModels(model, collision_model, visual_model)
+    elif include_obstacles:
         for obstacle in model_data.obstacles:
             obstacle.addToScene(scene)
             obstacle.addToPinocchioModels(model, collision_model, visual_model)
