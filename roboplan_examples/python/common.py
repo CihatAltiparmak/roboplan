@@ -91,6 +91,11 @@ class ObstacleConfig:
         visual_model: pin.GeometryModel,
     ) -> None:
         """Helper function to add the obstacle to Pinocchio geometry models."""
+        geom_obj = self.createGeometryObject(model)
+        collision_model.addGeometryObject(geom_obj)
+        visual_model.addGeometryObject(geom_obj)
+
+    def createGeometryObject(self, model: pin.Model):
         geom_obj = pin.GeometryObject(
             self.name,
             model.getFrameId(self.parent_frame),
@@ -98,8 +103,7 @@ class ObstacleConfig:
             self.geom,
         )
         geom_obj.meshColor = self.color
-        collision_model.addGeometryObject(geom_obj)
-        visual_model.addGeometryObject(geom_obj)
+        return geom_obj
 
 
 @dataclass

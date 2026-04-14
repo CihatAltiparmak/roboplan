@@ -20,6 +20,7 @@ from roboplan.visualization import (
     visualizePath,
     plotJointTrajectory,
     visualizeTree,
+    visualizeOcTree,
 )
 
 
@@ -98,17 +99,21 @@ def main(
     # Optionally add obstacles.
     # Again, until Pinocchio 4.x releases nanobind bindings, we need to add the obstacles separately
     # to the scene and to the Pinocchio models used for visualization.
-    if include_octrees:
-        for obstacle in model_data.octrees:
-            obstacle.addToScene(scene)
-            obstacle.addToPinocchioModels(model, collision_model, visual_model)
-    elif include_obstacles:
+    if include_obstacles:
         for obstacle in model_data.obstacles:
             obstacle.addToScene(scene)
             obstacle.addToPinocchioModels(model, collision_model, visual_model)
 
     viz = ViserVisualizer(model, collision_model, visual_model)
     viz.initViewer(open=True, loadModel=True, host=host, port=port)
+
+    if include_octrees:
+        for obstacle in model_data.octrees:
+            obstacle.addToScene(scene)
+
+            geom_obj = obstacle.createGeometryObject(model)
+            visualizeOcTree(viz, geom_obj, viz.collisionRootNodeName, obstacle.color)
+            visualizeOcTree(viz, geom_obj, viz.visualRootNodeName, obstacle.color)
 
     # Set up an RRT and perform path planning.
     options = RRTOptions(
