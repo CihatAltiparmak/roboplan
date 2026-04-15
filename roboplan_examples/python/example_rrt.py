@@ -61,7 +61,8 @@ def main(
         host: The host for the ViserVisualizer.
         port: The port for the ViserVisualizer.
         rng_seed: The seed for selecting random start and end poses and solving RRT.
-        include_obstacles: Whether or not to include additional obstacles in the scene.
+        include_obstacles: Whether or not to include additional obstacles in the scene. Don't use with `include_octrees` argument
+        include_octrees: Whether or not to include additional octrees in the scene. Don't use with `include_obstacles` argument
     """
 
     if model not in MODELS:
@@ -112,8 +113,8 @@ def main(
             obstacle.addToScene(scene)
 
             geom_obj = obstacle.createGeometryObject(model)
-            visualizeOcTree(viz, geom_obj, viz.collisionRootNodeName, obstacle.color)
-            visualizeOcTree(viz, geom_obj, viz.visualRootNodeName, obstacle.color)
+            visualizeOcTree(viz, geom_obj, viz.collisionRootNodeName)
+            visualizeOcTree(viz, geom_obj, viz.visualRootNodeName)
 
     # Set up an RRT and perform path planning.
     options = RRTOptions(

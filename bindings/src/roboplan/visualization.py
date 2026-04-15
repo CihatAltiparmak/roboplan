@@ -1,7 +1,7 @@
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
-from pinocchio import pinocchio_pywrap_default as pin
+import pinocchio as pin
 from pinocchio.visualize import ViserVisualizer
 
 from roboplan.core import Scene, computeFramePath, JointPath, JointTrajectory, OcTree

@@ -17,6 +17,7 @@ from roboplan.core import (
 )
 from roboplan.example_models import get_install_prefix
 
+
 URDF = """
 <robot name="robot">
   <link name="base_link"/>

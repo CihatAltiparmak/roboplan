@@ -16,6 +16,23 @@ namespace roboplan {
 using ::testing::ContainerEq;
 using ::testing::Not;
 
+OcTree createPointcloud() {
+  // Create octree with resolution 0.1 which generates Box(1.0, 1.0, 0.5)
+  const double resolution = 0.1;
+  Eigen::Matrix<double, 500, 3> point_cloud;
+  for (size_t x = 0; x < 10; ++x) {
+    for (size_t y = 0; y < 10; ++y) {
+      for (size_t z = 0; z < 5; ++z) {
+        point_cloud(50 * x + 5 * y + z, 0) = x;
+        point_cloud(50 * x + 5 * y + z, 1) = y;
+        point_cloud(50 * x + 5 * y + z, 2) = z;
+      }
+    }
+  }
+
+  return OcTree(hpp::fcl::makeOctree(point_cloud, resolution));
+}
+
 class RoboPlanSceneTest : public ::testing::Test {
 protected:
   void SetUp() override {
@@ -189,20 +206,8 @@ TEST_F(RoboPlanSceneTest, TestCollisionForOcTreeGeometry) {
   ASSERT_FALSE(scene_->hasCollisions(q));
 
   const auto color = Eigen::Vector4d(0.5, 0.5, 0.5, 0.5);
-  // Create octree with resolution 0.1 which generates Box(1.0, 1.0, 0.5)
-  const double resolution = 0.1;
-  Eigen::Matrix<double, 500, 3> point_cloud;
-  for (size_t x = 0; x < 10; ++x) {
-    for (size_t y = 0; y < 10; ++y) {
-      for (size_t z = 0; z < 5; ++z) {
-        point_cloud(50 * x + 5 * y + z, 0) = x;
-        point_cloud(50 * x + 5 * y + z, 1) = y;
-        point_cloud(50 * x + 5 * y + z, 2) = z;
-      }
-    }
-  }
 
-  auto octree_geometry = OcTree(hpp::fcl::makeOctree(point_cloud, resolution));
+  auto octree_geometry = createPointcloud();
 
   Eigen::Matrix4d octree_tform = Eigen::Matrix4d::Identity();
   octree_tform(0, 3) = 1.0;  // z position
@@ -229,20 +234,8 @@ TEST_F(RoboPlanSceneTest, TestSetCollisionsForOcTree) {
   ASSERT_FALSE(scene_->hasCollisions(q));
 
   const auto color = Eigen::Vector4d(0.5, 0.5, 0.5, 0.5);
-  // Create octree with resolution 0.1 which generates Box(1.0, 1.0, 0.5)
-  const double resolution = 0.1;
-  Eigen::Matrix<double, 500, 3> point_cloud;
-  for (size_t x = 0; x < 10; ++x) {
-    for (size_t y = 0; y < 10; ++y) {
-      for (size_t z = 0; z < 5; ++z) {
-        point_cloud(50 * x + 5 * y + z, 0) = x;
-        point_cloud(50 * x + 5 * y + z, 1) = y;
-        point_cloud(50 * x + 5 * y + z, 2) = z;
-      }
-    }
-  }
 
-  auto octree_geometry = OcTree(hpp::fcl::makeOctree(point_cloud, resolution));
+  auto octree_geometry = createPointcloud();
 
   Eigen::Matrix4d octree_tform = Eigen::Matrix4d::Identity();
   octree_tform(0, 3) = 0.6;  // z position
