@@ -79,7 +79,6 @@ install(TARGETS roboplan_example_models
 install(
   DIRECTORY
   models
-  pointclouds
   DESTINATION ${CMAKE_INSTALL_PREFIX}/share/roboplan_example_models
 )
 

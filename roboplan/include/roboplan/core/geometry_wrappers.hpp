@@ -40,10 +40,9 @@ struct OcTree {
     }
 
     for (const auto& box : boxes) {
-      octree->updateNode(
-        box[0], box[1], box[2],   // x, y and z coordinates 
-        octomap::logodds(box[4]), // occupancy of cell
-        true                      // enable lazy update
+      octree->updateNode(box[0], box[1], box[2],    // x, y and z coordinates
+                         octomap::logodds(box[4]),  // occupancy of cell
+                         true                       // enable lazy update
       );
     }
 

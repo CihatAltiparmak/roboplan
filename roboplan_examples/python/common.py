@@ -134,9 +134,19 @@ class RobotModelConfig:
 
 # Base directory for all robot models
 ROBOPLAN_MODELS_DIR = get_package_models_dir()
-ROBOPLAN_POINCLOUDS_DIR = os.path.join(
-    get_package_share_dir(), "roboplan_example_models", "pointclouds"
-)
+
+POINTCLOUDS = [
+    ObstacleConfig(
+        name="octree_cloud",
+        geom=load_point_cloud(
+            ROBOPLAN_MODELS_DIR / "pointclouds" / "example_point_cloud.ply",
+            0.04,  # resolution
+        ),
+        parent_frame="universe",
+        tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
+        color=np.array([0.251, 0.878, 0.816, 1.0]),
+    ),
+]
 
 MODELS = {
     "ur5": RobotModelConfig(
@@ -147,18 +157,7 @@ MODELS = {
         ee_names=["tool0"],
         base_link="base",
         starting_joint_config=[0.0, -np.pi / 2, np.pi / 2, -np.pi / 2, -np.pi / 2, 0.0],
-        octrees=[
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=load_point_cloud(
-                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
-                    0.04,
-                ),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
-                color=np.array([0.251, 0.878, 0.816, 1.0]),
-            ),
-        ],
+        octrees=POINTCLOUDS,
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -203,18 +202,7 @@ MODELS = {
             0.04,
             0.04,
         ],
-        octrees=[
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=load_point_cloud(
-                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
-                    0.4,
-                ),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
-                color=np.array([0.251, 0.878, 0.816, 1.0]),
-            ),
-        ],
+        octrees=POINTCLOUDS,
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -272,18 +260,7 @@ MODELS = {
             0.04,
             0.04,
         ],
-        octrees=[
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=load_point_cloud(
-                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
-                    0.4,
-                ),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
-                color=np.array([0.251, 0.878, 0.816, 1.0]),
-            ),
-        ],
+        octrees=POINTCLOUDS,
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -331,18 +308,7 @@ MODELS = {
             0.0,
             0.0,
         ],
-        octrees=[
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=load_point_cloud(
-                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
-                    0.4,
-                ),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
-                color=np.array([0.251, 0.878, 0.816, 1.0]),
-            ),
-        ],
+        octrees=POINTCLOUDS,
         obstacles=[
             ObstacleConfig(
                 name="test_box",
@@ -379,18 +345,7 @@ MODELS = {
         ee_names=["gripper_link"],
         base_link="base_link",
         starting_joint_config=[0.0, -np.pi / 4, 0.0, -np.pi / 2, 0.0, np.pi / 4],
-        octrees=[
-            ObstacleConfig(
-                name="octree_cloud",
-                geom=load_point_cloud(
-                    os.path.join(ROBOPLAN_POINCLOUDS_DIR, "example_point_cloud.ply"),
-                    0.4,
-                ),
-                parent_frame="universe",
-                tform=pin.SE3(np.eye(3), np.array([0.0, 0.0, 0.0])).homogeneous,
-                color=np.array([0.251, 0.878, 0.816, 1.0]),
-            ),
-        ],
+        octrees=POINTCLOUDS,
         obstacles=[
             ObstacleConfig(
                 name="test_box",
