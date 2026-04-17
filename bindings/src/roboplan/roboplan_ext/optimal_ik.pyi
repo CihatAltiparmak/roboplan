@@ -79,15 +79,19 @@ class FrameTaskOptions:
 class FrameTask(Task):
     """Task to reach a target pose for a specified frame."""
 
-    def __init__(self, target_pose: roboplan_ext.core.CartesianConfiguration, num_variables: int, options: FrameTaskOptions = ...) -> None: ...
+    def __init__(self, oink: Oink, scene: roboplan_ext.core.Scene, target_pose: roboplan_ext.core.CartesianConfiguration, options: FrameTaskOptions = ...) -> None: ...
 
     @property
     def frame_name(self) -> str:
         """Name of the frame to control."""
 
     @property
-    def frame_id(self) -> "std::optional<unsigned long>":
+    def frame_id(self) -> int:
         """Index of the frame in the scene's Pinocchio model."""
+
+    @property
+    def v_indices(self) -> Annotated[NDArray[numpy.int32], dict(shape=(None,), order='C')]:
+        """Velocity vector indices for the joint group."""
 
     @property
     def target_pose(self) -> roboplan_ext.core.CartesianConfiguration:
@@ -126,7 +130,7 @@ class ConfigurationTaskOptions:
 class ConfigurationTask(Task):
     """Task to reach a target joint configuration."""
 
-    def __init__(self, target_q: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')], joint_weights: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')], options: ConfigurationTaskOptions = ...) -> None: ...
+    def __init__(self, oink: Oink, target_q: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')], joint_weights: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')], options: ConfigurationTaskOptions = ...) -> None: ...
 
     @property
     def target_q(self) -> Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')]:
@@ -148,7 +152,7 @@ class Constraints:
 class PositionLimit(Constraints):
     """Constraint to enforce joint position limits."""
 
-    def __init__(self, num_variables: int, gain: float = 1.0) -> None: ...
+    def __init__(self, oink: Oink, gain: float = 1.0) -> None: ...
 
     @property
     def config_limit_gain(self) -> float:
@@ -160,7 +164,7 @@ class PositionLimit(Constraints):
 class VelocityLimit(Constraints):
     """Constraint to enforce joint velocity limits."""
 
-    def __init__(self, num_variables: int, dt: float, v_max: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')]) -> None: ...
+    def __init__(self, oink: Oink, dt: float, v_max: Annotated[NDArray[numpy.float64], dict(shape=(None,), order='C')]) -> None: ...
 
     @property
     def dt(self) -> float:
@@ -230,7 +234,7 @@ class PositionBarrier(Barrier):
     Position barrier constraint that keeps a frame within an axis-aligned bounding box.
     """
 
-    def __init__(self, frame_name: str, p_min: Annotated[NDArray[numpy.float64], dict(shape=(3), order='C')], p_max: Annotated[NDArray[numpy.float64], dict(shape=(3), order='C')], num_variables: int, dt: float, axis_selection: ConstraintAxisSelection = ..., gain: float = 1.0, safe_displacement_gain: float = 1.0, safety_margin: float = 0.0) -> None:
+    def __init__(self, oink: Oink, scene: roboplan_ext.core.Scene, frame_name: str, p_min: Annotated[NDArray[numpy.float64], dict(shape=(3), order='C')], p_max: Annotated[NDArray[numpy.float64], dict(shape=(3), order='C')], dt: float, axis_selection: ConstraintAxisSelection = ..., gain: float = 1.0, safe_displacement_gain: float = 1.0, safety_margin: float = 0.0) -> None:
         """Create a position barrier with optional axis selection."""
 
     def get_frame_position(self, scene: roboplan_ext.core.Scene) -> Annotated[NDArray[numpy.float64], dict(shape=(3), order='C')]:
@@ -255,15 +259,28 @@ class PositionBarrier(Barrier):
 class Oink:
     """Optimal Inverse Kinematics solver."""
 
-    def __init__(self, num_variables: int) -> None:
-        """Constructor with number of optimization variables."""
+    @overload
+    def __init__(self, scene: roboplan_ext.core.Scene, group_name: str) -> None:
+        """Constructor for a named joint group."""
+
+    @overload
+    def __init__(self, scene: roboplan_ext.core.Scene) -> None:
+        """Constructor for the full robot (all joints)."""
 
     @property
     def num_variables(self) -> int:
         """Number of optimization variables."""
 
+    @property
+    def q_indices(self) -> Annotated[NDArray[numpy.int32], dict(shape=(None,), order='C')]:
+        """Position indices of the joint group."""
+
+    @property
+    def v_indices(self) -> Annotated[NDArray[numpy.int32], dict(shape=(None,), order='C')]:
+        """Velocity indices of the joint group."""
+
     @overload
-    def solveIk(self, tasks: Sequence[Task], constraints: Sequence[Constraints], barriers: Sequence[Barrier], scene: roboplan_ext.core.Scene, delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
+    def solveIk(self, scene: roboplan_ext.core.Scene, tasks: Sequence[Task], constraints: Sequence[Constraints], barriers: Sequence[Barrier], delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
         """
         Solve inverse kinematics for given tasks, constraints, and optional barriers.
 
@@ -275,7 +292,6 @@ class Oink:
             tasks: List of weighted tasks to optimize for.
             constraints: List of constraints to satisfy.
             barriers: List of barrier functions for safety constraints (default: []).
-            scene: Scene containing robot model and state.
             delta_q: Pre-allocated numpy array for output (size = num_variables).
                      Must be a contiguous float64 array. Modified in-place.
             regularization: Tikhonov regularization weight for the QP Hessian
@@ -288,66 +304,63 @@ class Oink:
         Examples:
             # Without barriers:
             delta_q = np.zeros(oink.num_variables)
-            oink.solveIk(tasks, constraints, [], scene, delta_q)
+            oink.solveIk(scene, tasks, constraints, [], delta_q)
 
             # With barriers:
-            oink.solveIk(tasks, constraints, barriers, scene, delta_q)
+            oink.solveIk(scene, tasks, constraints, barriers, delta_q)
 
             # With custom regularization:
-            oink.solveIk(tasks, constraints, barriers, scene, delta_q, 1e-6)
+            oink.solveIk(scene, tasks, constraints, barriers, delta_q, 1e-6)
         """
 
     @overload
-    def solveIk(self, tasks: Sequence[Task], scene: roboplan_ext.core.Scene, delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
+    def solveIk(self, scene: roboplan_ext.core.Scene, tasks: Sequence[Task], delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
         """
         Solve inverse kinematics for tasks only (no constraints or barriers).
 
         Args:
             tasks: List of weighted tasks to optimize for.
-            scene: Scene containing robot model and state.
             delta_q: Pre-allocated numpy array for output (size = num_variables).
             regularization: Tikhonov regularization weight (default: 1e-12).
 
         Example:
             delta_q = np.zeros(oink.num_variables)
-            oink.solveIk(tasks, scene, delta_q)
+            oink.solveIk(scene, tasks, delta_q)
         """
 
     @overload
-    def solveIk(self, tasks: Sequence[Task], constraints: Sequence[Constraints], scene: roboplan_ext.core.Scene, delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
+    def solveIk(self, scene: roboplan_ext.core.Scene, tasks: Sequence[Task], constraints: Sequence[Constraints], delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
         """
         Solve inverse kinematics for tasks with constraints (no barriers).
 
         Args:
             tasks: List of weighted tasks to optimize for.
             constraints: List of constraints to satisfy.
-            scene: Scene containing robot model and state.
             delta_q: Pre-allocated numpy array for output (size = num_variables).
             regularization: Tikhonov regularization weight (default: 1e-12).
 
         Example:
             delta_q = np.zeros(oink.num_variables)
-            oink.solveIk(tasks, constraints, scene, delta_q)
+            oink.solveIk(scene, tasks, constraints, delta_q)
         """
 
     @overload
-    def solveIk(self, tasks: Sequence[Task], barriers: Sequence[Barrier], scene: roboplan_ext.core.Scene, delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
+    def solveIk(self, scene: roboplan_ext.core.Scene, tasks: Sequence[Task], barriers: Sequence[Barrier], delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], regularization: float = 1e-12) -> None:
         """
         Solve inverse kinematics for tasks with barriers (no constraints).
 
         Args:
             tasks: List of weighted tasks to optimize for.
             barriers: List of barrier functions for safety constraints.
-            scene: Scene containing robot model and state.
             delta_q: Pre-allocated numpy array for output (size = num_variables).
             regularization: Tikhonov regularization weight (default: 1e-12).
 
         Example:
             delta_q = np.zeros(oink.num_variables)
-            oink.solveIk(tasks, barriers, scene, delta_q)
+            oink.solveIk(scene, tasks, barriers, delta_q)
         """
 
-    def enforceBarriers(self, barriers: Sequence[Barrier], scene: roboplan_ext.core.Scene, delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], tolerance: float = 0.0) -> None:
+    def enforceBarriers(self, scene: roboplan_ext.core.Scene, barriers: Sequence[Barrier], delta_q: Annotated[NDArray[numpy.float64], dict(shape=(None,))], tolerance: float = 0.0) -> None:
         """
         Validate delta_q against barriers using forward kinematics.
 
@@ -360,7 +373,6 @@ class Oink:
 
         Args:
             barriers: List of barrier functions to check.
-            scene: Scene containing robot model and state (current configuration q).
             delta_q: Configuration displacement to validate. Modified in place: set to
                      zero if barrier violation is detected.
             tolerance: Tolerance for barrier violation detection. A barrier is considered
@@ -371,6 +383,6 @@ class Oink:
 
         Example:
             delta_q = np.zeros(oink.num_variables)
-            oink.solveIk(tasks, constraints, barriers, scene, delta_q)
-            oink.enforceBarriers(barriers, scene, delta_q)
+            oink.solveIk(scene, tasks, constraints, barriers, delta_q)
+            oink.enforceBarriers(scene, barriers, delta_q)
         """
