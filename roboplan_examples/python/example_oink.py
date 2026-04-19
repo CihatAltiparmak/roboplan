@@ -11,7 +11,7 @@ import pinocchio as pin
 from pinocchio.visualize import ViserVisualizer
 
 from common import MODELS
-from filters import SE3LowPassFilter
+from roboplan.filters import SE3LowPassFilter
 from roboplan.core import Scene, CartesianConfiguration
 from roboplan.example_models import get_package_share_dir
 from roboplan.optimal_ik import (

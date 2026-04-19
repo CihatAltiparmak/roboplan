@@ -104,6 +104,7 @@ set(ROBOPLAN_EXT_SOURCES
   src/roboplan_ext.cpp
   src/modules/core.cpp
   src/modules/example_models.cpp
+  src/modules/filters.cpp
   src/modules/optimal_ik.cpp
   src/modules/rrt.cpp
   src/modules/simple_ik.cpp
@@ -139,6 +140,7 @@ endif()
 target_link_libraries(roboplan_ext PRIVATE
   roboplan::roboplan
   roboplan_example_models::roboplan_example_models
+  roboplan::filters
   roboplan_oink::roboplan_oink
   roboplan_rrt::roboplan_rrt
   roboplan_simple_ik::roboplan_simple_ik
@@ -158,6 +160,7 @@ if(AMENT_BUILD)
   if(BUILD_TESTING)
     find_package(ament_cmake_pytest REQUIRED)
     set(BINDINGS_TESTS_PY
+      test_filters
       test_import
       test_rrt
       test_scene

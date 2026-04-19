@@ -2,6 +2,7 @@
 
 #include <modules/core.hpp>
 #include <modules/example_models.hpp>
+#include <modules/filters.hpp>
 #include <modules/optimal_ik.hpp>
 #include <modules/rrt.hpp>
 #include <modules/simple_ik.hpp>
@@ -26,6 +27,10 @@ NB_MODULE(roboplan_ext, m) {
   /// Example models module
   nanobind::module_ m_example_models = m.def_submodule("example_models", "Example models");
   init_example_models(m_example_models);
+
+  /// Filters module
+  nanobind::module_ m_filters = m.def_submodule("filters", "Filters module");
+  init_filters(m_filters);
 
   /// RRT module
   nanobind::module_ m_rrt = m.def_submodule("rrt", "RRT module");

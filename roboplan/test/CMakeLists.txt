@@ -38,6 +38,14 @@ target_link_libraries(
   roboplan_example_models::roboplan_example_models
 )
 
+add_executable(test_se3_low_pass_filter test_se3_low_pass_filter.cpp)
+set_property(TARGET test_se3_low_pass_filter PROPERTY CXX_STANDARD 20)
+target_link_libraries(
+  test_se3_low_pass_filter
+  filters
+  GTest::gtest_main
+)
+
 # TODO: Define tests as a variable
 
 # If ament_gtest is detected, make the tests visible in ROS 2.
@@ -47,10 +55,12 @@ if ( ament_cmake_gtest_FOUND )
     ament_add_gtest_test(test_scene)
     ament_add_gtest_test(test_joints)
     ament_add_gtest_test(test_path_utils)
+    ament_add_gtest_test(test_se3_low_pass_filter)
 else()
     include(GoogleTest)
     gtest_discover_tests(test_types)
     gtest_discover_tests(test_scene)
     gtest_discover_tests(test_joints)
     gtest_discover_tests(test_path_utils)
+    gtest_discover_tests(test_se3_low_pass_filter)
 endif()
